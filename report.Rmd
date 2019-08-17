@@ -1,0 +1,110 @@
+---
+title: "Dogs Thyroids"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning = FALSE, results = 'hide', message = FALSE)
+```
+
+
+```{r}
+source('clean_thyroids.R')
+```
+
+
+## Calcular un valor de tiroides único para cada perro
+
+```{r}
+clean_thyroids %>% 
+  select(id, right_NC_avg, right_WC_avg, left_NC_avg, left_WC_avg) %>% 
+  melt(id.vars = 'id') %>% 
+  group_by(variable) %>% 
+  mutate(avg = mean(value, na.rm = TRUE)) %>% 
+  ggplot(aes( x = value, fill = variable)) +
+  geom_density(alpha = 0.75) +
+  geom_vline(aes(xintercept = avg)) +
+  geom_label(aes(x = avg, y = 0.02, label = avg %>% round(0)), fill = hp(2, option = 'newtscamander')[[1]]) +
+  facet_wrap(variable~., scales = 'free') +
+  theme_pubr() +
+  scale_fill_got_d(option = 'Daenerys', guide = FALSE) +
+  xlab('Value') +
+  ylab('Frequency')
+```
+
+Para los 4 valores que tenemos, las distribuciones están bastante centradas alrededor de una media, por lo que reducir las distintas muestras recogidas por sujeto a la media de todas ellas es una aproximación muy razonable
+
+
+## Rango de Normalidad
+```{r}
+thyroids_unique_value() %>% 
+  select(-atenuacion_baja, -braquicefalico) %>% 
+  melt(id.vars = c('id'))  %>% 
+  group_by(variable) %>% 
+  summarise(quantile = list(enframe(quantile(value, probs=c(0.1,0.9), na.rm = TRUE)))) %>% 
+  unnest %>% 
+  rename(quantile_level = name, quantile_value = value) %>% 
+  right_join(
+    thyroids_unique_value() %>% 
+      select(-atenuacion_baja, -braquicefalico) %>% 
+      melt(id.vars = c('id')) 
+  ) %>% 
+  group_by(variable) %>% 
+  mutate(quantile_min = min(quantile_value),
+         quantile_max = max(quantile_value)) %>% 
+  ggplot(aes(x = value, fill = variable)) +
+  # geom_rect(
+  #   data = ,
+  #   aes(
+  #     xmin = quantile_min,
+  #     xmax = quantile_max
+  #   ),
+  #   ymin = 0,
+  #   ymax = Inf,
+  #   fill = hp(10)[[3]],
+  #   alpha = 0.1
+  # ) +
+  geom_histogram(binwidth = 15, colour = 'black', size = 0.2, alpha = 0.75) +
+  facet_wrap(variable~., scales = 'free') +
+  geom_vline(aes(xintercept = quantile_value), size = 1, colour = 'grey') +
+  geom_label(aes(x = quantile_value, y = 20, label = quantile_value %>% round(0)), fill = hp(option = 'newtscamander', n = 2)[[1]], alpha = 0.5) +
+  scale_fill_got_d(option = 'Daenerys', guide = FALSE) +
+  theme_pubr() +
+  xlab('Value') +
+  ylab('')
+```
+
+Una vez reducidos los valores a uno por animal, podemos ver la distribución que queda. Vemos que hay unos valores centrales muy marcados como 'lo habitual', mientras que los valores alejados de ahí son claramente inusuales. Definir la frontera entre 'valores normales' y 'valores inusuales' siempre requiere cierta arbitrariedad, pero viendo lo centradas que son las distribuciones, resolver esto por quantiles parece lo más razonable y sencillo.
+
+Los quadrados amarillos marcan los límites de lo que podría esperarse en el 80% de los casos. Por ejemplo, para el `Right NC` la interpretación sería que solo el 10% de los sujetos presentan un valor por debajo de `67`, y solo un 10% de los sujetas presentan un valor por encima de `121`. Se concluye que 'la normalidad' está entre esos dos valores.
+
+
+
+## Las razas braquicefálicas tienen atenuaciones diferentes de las demás razas?
+
+```{r}
+braqui_atenuation_test()
+```
+
+
+Tenemos evidencias para decir que los valores de `Right NC` y `Left NC` son inferiores en razas clasificadas como braquicefálicas. No así para los valores de `Right WC` o `Left WC`, ni tiene pinta que vaya a haberla aunque aumentemos el número de muestras.
+
+Que la cantidad de animales braquicefálicos sea superior o inferior al resto no nos sesga los datos _per se_, siempre que el procedimiento de recogida de datos sea idéntico independientemente de la raza de los perros esto no debería importarnos. Mientras tengamos "suficientes" de ambas clases para tener evidencia estadística, la proporción entre ellos no debería preocuparnos.
+
+
+## Cuántos animales hacen falta como control
+
+No estoy seguro de si he entendido esta pregunta. He visto algun sujeto marcado como 'control' que está bajo medicación (_dylan_), mientras que otros animales marcados sin patología y sin medicación no están marcados como grupo 'control'.
+
+
+## Correlacionar valores de T4 y TSH con atenuación
+
+```{r}
+blood_plots$t4_plot
+blood_plots$tsh_plot
+```
+
+No parecer haber ninguna correlación entre los valores de tiroides y los valores en sangre.
