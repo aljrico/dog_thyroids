@@ -31,7 +31,7 @@ clean_thyroids %>%
   geom_label(aes(x = avg, y = 0.02, label = avg %>% round(0)), fill = hp(2, option = 'newtscamander')[[1]]) +
   facet_wrap(contrast~., scales = 'free') +
   theme_pubr() +
-  scale_fill_got_d(option = 'Daenerys', guide = FALSE) +
+  scale_fill_got_d(option = 'Margaery', guide = FALSE) +
   xlab('Value') +
   ylab('Frequency')
 ```
@@ -57,7 +57,7 @@ thyroids_unique_value() %>%
   facet_wrap(contrast~., scales = 'free') +
   geom_vline(aes(xintercept = quantile_value), size = 1, colour = 'grey') +
   geom_label(aes(x = quantile_value, y = 20, label = quantile_value %>% round(0)), fill = hp(option = 'newtscamander', n = 2)[[1]], alpha = 0.5) +
-  scale_fill_got_d(option = 'tully', guide = FALSE) +
+  scale_fill_got_d(option = 'Margaery', guide = FALSE) +
   theme_pubr() +
   xlab('Value') +
   ylab('')
@@ -123,7 +123,7 @@ thyroids_unique_value() %>%
   facet_wrap(contrast~., scales = 'free') +
   geom_vline(aes(xintercept = quantile_value), size = 1, colour = 'grey') +
   geom_label(aes(x = quantile_value, y = 20, label = quantile_value %>% round(0)), fill = hp(option = 'newtscamander', n = 2)[[1]], alpha = 0.5) +
-  scale_fill_got_d(option = 'tully', guide = FALSE) +
+  scale_fill_got_d(option = 'Margaery', guide = FALSE) +
   theme_pubr() +
   xlab('Value') +
   ylab('') +
@@ -163,7 +163,7 @@ thyroids_unique_value() %>%
   facet_wrap(contrast~., scales = 'free') +
   geom_vline(aes(xintercept = quantile_value), size = 1, colour = 'grey') +
   geom_label(aes(x = quantile_value, y = 20, label = quantile_value %>% round(0)), fill = hp(option = 'newtscamander', n = 2)[[1]], alpha = 0.5) +
-  scale_fill_got_d(option = 'tully', guide = FALSE) +
+  scale_fill_got_d(option = 'Margaery', guide = FALSE) +
   theme_pubr() +
   xlab('Value') +
   ylab('') +
@@ -185,3 +185,181 @@ blood_plots$tsh_plot
 ```
 
 No parecer haber ninguna correlación entre los valores de tiroides y los valores en sangre.
+
+## Correlación entre edad y atenuación de tiroides
+
+```{r}
+clean_thyroids %>% 
+  group_by(id, contrast) %>% 
+  summarise(value = mean(value, na.rm = TRUE)) %>% 
+  inner_join(
+    read_excel('datos_2.xlsx') %>% 
+      mutate(Edat = ifelse(Edat %>% str_detect('a'), as.numeric(Edat %>% str_remove_all('a')), ifelse(Edat %>% str_detect('m'), as.numeric(Edat %>% str_remove_all('m')) / 12, as.numeric(Edat)))) %>% 
+      rename(id = `Nº (P)`) %>% 
+      select(id, Edat, braquicefalico) %>% 
+      na.omit()
+  ) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = Edat, y = value, colour = contrast)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE) +
+  facet_wrap(contrast~., scale = 'free') +
+  scale_colour_got_d(option = 'Margaery', guide = FALSE) +
+  theme_pubr()
+```
+
+Ninguna correlación observable. 
+
+## Correlación entre peso y atenuación de tiroides
+
+```{r}
+
+clean_thyroids %>% 
+  group_by(id, contrast) %>% 
+  summarise(value = mean(value, na.rm = TRUE)) %>% 
+  inner_join(
+    read_excel('datos_2.xlsx') %>% 
+      rename(id = `Nº (P)`) %>% 
+      select(id, peso, braquicefalico) %>% 
+      mutate(peso = peso %>% tolower() %>% str_remove_all('kg') %>% as.numeric()) %>% 
+      na.omit()
+  ) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = peso, y = value, colour = contrast)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE) +
+  facet_wrap(contrast~., scale = 'free') +
+  xlab('Peso') +
+  scale_colour_got_d(option = 'Margaery', guide = FALSE) +
+  theme_pubr()
+```
+
+Ninguna correlación, salvo son mucho más dispersos para pesos bajos.
+
+## Los valores de atenuación cambian según el sexo del animal?
+
+```{r}
+clean_thyroids %>% 
+  group_by(id, contrast) %>% 
+  summarise(value = mean(value, na.rm = TRUE)) %>% 
+  inner_join(
+    read_excel('datos_2.xlsx') %>% 
+      rename(id = `Nº (P)`) %>% 
+      select(id, sexo, braquicefalico) %>% 
+      mutate(sexo = ifelse(sexo %>% tolower() %>% str_detect('h'), 'Hembra', 'Macho')) %>% 
+      mutate(sexo = as.factor(sexo)) %>% 
+      na.omit()
+  ) %>% 
+  as_tibble() %>% 
+  filter(!is.nan(value)) %>% 
+  ggplot(aes(x = sexo, y = value, fill = sexo)) +
+  geom_boxplot(size = 0.5, outlier.shape = NA) +
+  facet_wrap(contrast~., scales = 'free') +
+  stat_compare_means(method = 't.test') +
+  scale_x_discrete() +
+  scale_fill_got_d(option = 'Margaery', name = '', guide = FALSE) +
+  theme_pubr() +
+  xlab('') +
+  ylab('Atenuation Value')
+
+```
+
+No hay evidencias significativas para encontrar diferencia entre sexos.
+
+
+## Los valores de atenuación cambian según si el paciente tiene cáncer?
+
+```{r}
+
+clean_thyroids %>% 
+  group_by(id, contrast) %>% 
+  summarise(value = mean(value, na.rm = TRUE)) %>% 
+  inner_join(
+    read_excel('datos_2.xlsx') %>% 
+      rename(id = `Nº (P)`) %>% 
+      select(id, cancer, braquicefalico) %>% 
+      na.omit()
+  ) %>% 
+  as_tibble() %>% 
+  filter(!is.nan(value)) %>% 
+  ggplot(aes(x = cancer, y = value, fill = cancer)) +
+  geom_boxplot(size = 0.5, outlier.shape = NA) +
+  facet_wrap(contrast~., scales = 'free') +
+  stat_compare_means(method = 't.test') +
+  scale_x_discrete() +
+  scale_fill_got_d(option = 'Margaery', name = '', guide = FALSE) +
+  theme_pubr() +
+  xlab('') +
+  ylab('Atenuation Value')
+```
+
+No hay diferencias significativas en el valor de atenuación de tiroides entre el grupo con cáncer y el grupo sin cáncer.
+
+## Los valores de atenuación cambian según si el paciente está bajo medicación?
+
+```{r, results = 'show'}
+create_medication_columns <- function(df){
+  list_meds <- df$medicacions %>% unique() %>% str_split(' \\+ ') %>% unlist() %>% unique()
+  list_meds <- list_meds[!is.na(list_meds)]
+  
+  for(m in list_meds) df[, m] <- df$medicacions == m
+  return(df)
+}
+medications_atenuation_test <- function(df){
+  list_meds <- df$medicacions %>% unique() %>% str_split(' \\+ ') %>% unlist() %>% unique()
+  list_meds <- list_meds[!is.na(list_meds)]
+  
+  result_list <- list()
+  
+  for(m in list_meds){
+    x <- medications_df %>% filter(`no med`) %>% .$value
+    y <- medications_df %>% .[get(m) == TRUE] %>% .$value
+    
+    try(
+      result_list[[m]] <- t.test(y,x) %>% .$p.value
+    )
+  }
+  
+  result_list %>% 
+    as_tibble() %>% 
+    melt() %>% 
+    rename(
+      medication = variable,
+      pvalue = value
+    ) %>% 
+    return()
+}
+
+
+medications_df <- clean_thyroids %>% 
+  group_by(id, contrast) %>% 
+  summarise(value = mean(value, na.rm = TRUE)) %>% 
+  inner_join(
+    read_excel('datos_2.xlsx') %>% 
+      rename(id = `Nº (P)`) %>% 
+      select(id, medicacions, braquicefalico) %>% 
+      create_medication_columns() %>% 
+      na.omit()
+  ) %>% 
+  as_tibble() %>% 
+  filter(!is.nan(value)) %>% 
+  data.table()
+
+# medications_df %>% medications_atenuation_test() %>% filter(medication != 'no med') %>% knitr::kable()
+```
+
+
+
+La forma más genérica de evaluar esta pregunta sería hacer un grupo con los animales en `no med` y otro grupo con todos los demás, que sería un grupo de animales que se están tomando cualquier medicación, la que sea.
+
+```{r, results = 'show'}
+x <- medications_df %>% filter(`no med`) %>% .$value
+y <- medications_df %>% filter(!(`no med`)) %>% .$value
+
+t.test(y,x)
+```
+
+
+La conclusión sencilla de esto es que ninguno de estos medicamentos afecta al valor de atenuación.
+
+

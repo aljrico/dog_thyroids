@@ -112,7 +112,7 @@ thyroids_unique_value <- function(unified_left_right = TRUE){
         left_WC = mean(left_WC_avg, na.rm = TRUE)
       ) %>% 
       inner_join(
-        read_excel('datos_1.xlsx') %>% 
+        read_excel('datos_2.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
           select(id, atenuacion_baja, braquicefalico) %>% 
           na.omit()
@@ -128,7 +128,7 @@ braqui_atenuation_test <- function(unified_left_right = TRUE){
       group_by(id, contrast) %>% 
       summarise(value = mean(value, na.rm = TRUE)) %>% 
       inner_join(
-        read_excel('datos_1.xlsx') %>% 
+        read_excel('datos_2.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
           select(id, atenuacion_baja, braquicefalico) %>% 
           na.omit()
@@ -139,7 +139,7 @@ braqui_atenuation_test <- function(unified_left_right = TRUE){
       facet_wrap(contrast~., scales = 'free') +
       stat_compare_means(method = 't.test') +
       scale_x_discrete(labels = c('No Braqui', 'Braqui')) +
-      scale_fill_got_d(option = 'Margaery', labels = c('No Braquicefálico', 'Braquicefálico'), name = '', guide = FALSE) +
+      scale_fill_hp_d(option = 'sprout', labels = c('No Braquicefálico', 'Braquicefálico'), name = '', guide = FALSE) +
       theme_pubr() +
       xlab('') +
       ylab('Atenuation Value')
@@ -154,7 +154,7 @@ braqui_atenuation_test <- function(unified_left_right = TRUE){
         left_WC = mean(left_WC_avg, na.rm = TRUE)
       ) %>% 
       inner_join(
-        read_excel('datos_1.xlsx') %>% 
+        read_excel('datos_2.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
           select(id, atenuacion_baja, braquicefalico) %>% 
           na.omit()
@@ -179,7 +179,7 @@ sick_thyroids_test <- function(unified_left_right = TRUE){
       group_by(id, contrast) %>% 
       summarise(value = mean(value, na.rm = TRUE)) %>% 
       inner_join(
-        read_excel('datos_1.xlsx') %>% 
+        read_excel('datos_2.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
           select(id, atenuacion_baja, control) %>% 
           na.omit()
@@ -206,7 +206,7 @@ sick_thyroids_test <- function(unified_left_right = TRUE){
         left_WC = mean(left_WC_avg, na.rm = TRUE)
       ) %>% 
       inner_join(
-        read_excel('datos_1.xlsx') %>% 
+        read_excel('datos_2.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
           select(id, atenuacion_baja, control) %>% 
           na.omit()
@@ -236,7 +236,7 @@ sample_size <- function(){
       left_WC = mean(left_WC_avg, na.rm = TRUE)
     ) %>% 
     inner_join(
-      read_excel('datos_1.xlsx') %>% 
+      read_excel('datos_2.xlsx') %>% 
         rename(id = `Nº (P)`) %>% 
         select(id, atenuacion_baja, control) %>% 
         na.omit()
@@ -290,7 +290,7 @@ blood_thyroids_corr <- function(unified_left_right = TRUE){
   
   if(unified_left_right){
     dat <- 
-      read_excel('datos_1.xlsx', sheet = 'Full2') %>% 
+      read_excel('datos_2.xlsx', sheet = 'Full2') %>% 
       rename(T4 = `T4 (ug/dL)`,
              TSH = `TSH (ng/mL)`) %>% 
       select(Nom, T4, TSH) %>% 
@@ -320,18 +320,22 @@ blood_thyroids_corr <- function(unified_left_right = TRUE){
       ggplot(aes( x = value, y = T4, colour = contrast)) +
       geom_point() +
       geom_smooth(method = 'lm', se = FALSE) +
-      facet_wrap(contrast~., scales = 'free')
+      facet_wrap(contrast~., scales = 'free') +
+      scale_colour_got_d(option = 'Margaery', guide = FALSE) +
+      theme_pubr()
     
     tsh_plot <- dat %>% 
       ggplot(aes( x = value, y = TSH, colour = contrast)) +
       geom_point() +
       geom_smooth(method = 'lm', se = FALSE) +
-      facet_wrap(contrast~., scales = 'free')
+      facet_wrap(contrast~., scales = 'free') +
+      scale_colour_got_d(option = 'Margaery', guide = FALSE) +
+      theme_pubr()
     
   }else{
     
     dat <- 
-      read_excel('datos_1.xlsx', sheet = 'Full2') %>% 
+      read_excel('datos_2.xlsx', sheet = 'Full2') %>% 
       rename(T4 = `T4 (ug/dL)`,
              TSH = `TSH (ng/mL)`) %>% 
       select(Nom, T4, TSH) %>% 
@@ -365,13 +369,17 @@ blood_thyroids_corr <- function(unified_left_right = TRUE){
       ggplot(aes( x = value, y = T4, colour = variable)) +
       geom_point() +
       geom_smooth(method = 'lm', se = FALSE) +
-      facet_wrap(variable~., scales = 'free')
+      facet_wrap(variable~., scales = 'free') +
+      scale_colour_got_d(option = 'Margaery', guide = FALSE) +
+      theme_pubr()
     
     tsh_plot <- dat %>% 
       ggplot(aes( x = value, y = TSH, colour = variable)) +
       geom_point() +
       geom_smooth(method = 'lm', se = FALSE) +
-      facet_wrap(variable~., scales = 'free')
+      facet_wrap(variable~., scales = 'free') +
+      scale_colour_got_d(option = 'Margaery', guide = FALSE) +
+      theme_pubr()
   }
   
   return(list(t4_plot = t4_plot, tsh_plot = tsh_plot))
@@ -384,3 +392,53 @@ blood_plots <- blood_thyroids_corr()
 
 blood_plots$t4_plot
 blood_plots$tsh_plot
+
+
+create_medication_columns <- function(df){
+  list_meds <- df$medicacions %>% unique() %>% str_split(' \\+ ') %>% unlist() %>% unique()
+  list_meds <- list_meds[!is.na(list_meds)]
+  
+  for(m in list_meds) df[, m] <- df$medicacions == m
+  return(df)
+}
+medications_atenuation_test <- function(df){
+  list_meds <- df$medicacions %>% unique() %>% str_split(' \\+ ') %>% unlist() %>% unique()
+  list_meds <- list_meds[!is.na(list_meds)]
+  
+  result_list <- list()
+  
+  for(m in list_meds){
+    x <- medications_df %>% filter(`no med`) %>% filter(contrast == 'NC') %>%  .$value
+    y <- medications_df %>% .[get(m) == TRUE & contrast == 'NC'] %>% .$value
+    
+    try(
+      result_list[[m]] <- t.test(y,x) %>% .$p.value
+    )
+  }
+  
+  result_list %>% 
+    as_tibble() %>% 
+    melt() %>% 
+    rename(
+      medication = variable,
+      pvalue = value
+    ) %>% 
+    return()
+}
+
+
+medications_df <- clean_thyroids %>% 
+  group_by(id, contrast) %>% 
+  summarise(value = mean(value, na.rm = TRUE)) %>% 
+  inner_join(
+    read_excel('datos_2.xlsx') %>% 
+      rename(id = `Nº (P)`) %>% 
+      select(id, medicacions, braquicefalico) %>% 
+      create_medication_columns() %>% 
+      na.omit()
+  ) %>% 
+  as_tibble() %>% 
+  filter(!is.nan(value)) %>% 
+  data.table()
+
+medications_df %>% medications_atenuation_test() %>% filter(medication != 'no med') %>% knitr::kable()
