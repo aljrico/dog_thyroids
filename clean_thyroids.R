@@ -5,13 +5,12 @@ library(readxl)
 
 library(gameofthrones)
 library(harrypotter)
-
 library(ggpubr)
 
 get_clean_thyroids <- function(unify_left_right = TRUE){
   
   df <- 
-    read_excel('thyroids_values.xlsx') %>% 
+    read_excel('thyroids_values_2.xlsx') %>% 
     rename(
       id = `...1`,
       name = `...2`,
@@ -112,9 +111,9 @@ thyroids_unique_value <- function(unified_left_right = TRUE){
         left_WC = mean(left_WC_avg, na.rm = TRUE)
       ) %>% 
       inner_join(
-        read_excel('datos_2.xlsx') %>% 
+        read_excel('datos_3.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
-          select(id, atenuacion_baja, braquicefalico) %>% 
+          select(id, braquicefalico) %>% 
           na.omit()
       ) %>% 
       as_tibble()
@@ -128,9 +127,9 @@ braqui_atenuation_test <- function(unified_left_right = TRUE){
       group_by(id, contrast) %>% 
       summarise(value = mean(value, na.rm = TRUE)) %>% 
       inner_join(
-        read_excel('datos_2.xlsx') %>% 
+        read_excel('datos_3.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
-          select(id, atenuacion_baja, braquicefalico) %>% 
+          select(id, braquicefalico) %>% 
           na.omit()
       ) %>% 
       as_tibble() %>% 
@@ -154,13 +153,13 @@ braqui_atenuation_test <- function(unified_left_right = TRUE){
         left_WC = mean(left_WC_avg, na.rm = TRUE)
       ) %>% 
       inner_join(
-        read_excel('datos_2.xlsx') %>% 
+        read_excel('datos_3.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
-          select(id, atenuacion_baja, braquicefalico) %>% 
+          select(id, braquicefalico) %>% 
           na.omit()
       ) %>% 
       as_tibble() %>% 
-      melt(id.vars = c('id', 'atenuacion_baja', 'braquicefalico')) %>% 
+      melt(id.vars = c('id', 'braquicefalico')) %>% 
       ggplot(aes(x = braquicefalico, y = value, fill = braquicefalico)) +
       geom_boxplot(size = 0.5, outlier.shape = NA) +
       facet_wrap(variable~., scales = 'free') +
@@ -179,9 +178,9 @@ sick_thyroids_test <- function(unified_left_right = TRUE){
       group_by(id, contrast) %>% 
       summarise(value = mean(value, na.rm = TRUE)) %>% 
       inner_join(
-        read_excel('datos_2.xlsx') %>% 
+        read_excel('datos_3.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
-          select(id, atenuacion_baja, control) %>% 
+          select(id, control) %>% 
           na.omit()
       ) %>% 
       as_tibble() %>% 
@@ -206,13 +205,13 @@ sick_thyroids_test <- function(unified_left_right = TRUE){
         left_WC = mean(left_WC_avg, na.rm = TRUE)
       ) %>% 
       inner_join(
-        read_excel('datos_2.xlsx') %>% 
+        read_excel('datos_3.xlsx') %>% 
           rename(id = `Nº (P)`) %>% 
-          select(id, atenuacion_baja, control) %>% 
+          select(id, control) %>% 
           na.omit()
       ) %>% 
       as_tibble() %>% 
-      melt(id.vars = c('id', 'atenuacion_baja', 'control')) %>% 
+      melt(id.vars = c('id', 'control')) %>% 
       ggplot(aes(x = control, y = value, fill = control)) +
       geom_boxplot(size = 0.5, outlier.shape = NA) +
       facet_wrap(variable~., scales = 'free') +
@@ -236,13 +235,13 @@ sample_size <- function(){
       left_WC = mean(left_WC_avg, na.rm = TRUE)
     ) %>% 
     inner_join(
-      read_excel('datos_2.xlsx') %>% 
+      read_excel('datos_3.xlsx') %>% 
         rename(id = `Nº (P)`) %>% 
-        select(id, atenuacion_baja, control) %>% 
+        select(id, control) %>% 
         na.omit()
     ) %>% 
     as_tibble() %>% 
-    melt(id.vars = c('id', 'atenuacion_baja', 'control')) %>% 
+    melt(id.vars = c('id', 'control')) %>% 
     group_by(variable) %>% 
     mutate(all_sd = sd(value, na.rm = TRUE)) %>% 
     group_by(control, variable) %>% 
@@ -290,7 +289,7 @@ blood_thyroids_corr <- function(unified_left_right = TRUE){
   
   if(unified_left_right){
     dat <- 
-      read_excel('datos_2.xlsx', sheet = 'Full2') %>% 
+      read_excel('datos_3.xlsx', sheet = 'Full2') %>% 
       rename(T4 = `T4 (ug/dL)`,
              TSH = `TSH (ng/mL)`) %>% 
       select(Nom, T4, TSH) %>% 
@@ -335,7 +334,7 @@ blood_thyroids_corr <- function(unified_left_right = TRUE){
   }else{
     
     dat <- 
-      read_excel('datos_2.xlsx', sheet = 'Full2') %>% 
+      read_excel('datos_3.xlsx', sheet = 'Full2') %>% 
       rename(T4 = `T4 (ug/dL)`,
              TSH = `TSH (ng/mL)`) %>% 
       select(Nom, T4, TSH) %>% 
@@ -431,7 +430,7 @@ medications_df <- clean_thyroids %>%
   group_by(id, contrast) %>% 
   summarise(value = mean(value, na.rm = TRUE)) %>% 
   inner_join(
-    read_excel('datos_2.xlsx') %>% 
+    read_excel('datos_3.xlsx') %>% 
       rename(id = `Nº (P)`) %>% 
       select(id, medicacions, braquicefalico) %>% 
       create_medication_columns() %>% 
@@ -442,3 +441,26 @@ medications_df <- clean_thyroids %>%
   data.table()
 
 medications_df %>% medications_atenuation_test() %>% filter(medication != 'no med') %>% knitr::kable()
+
+clean_thyroids %>% 
+  group_by(id, name, contrast) %>%
+  summarise(value = mean(value, na.rm = TRUE)) %>% 
+  fwrite('individual_values.csv')
+
+
+
+clean_thyroids %>% 
+  na.omit() %>% 
+  group_by(id, name, contrast) %>%
+  summarise(range_min = quantile(value, probs = 0.05, na.rm = TRUE),
+            range_max = quantile(value, probs = 0.95, na.rm = TRUE),
+            avg = mean(value, na.rm = TRUE)) %>% 
+  fwrite('individual_values.csv')
+
+clean_thyroids %>%   
+  group_by(contrast) %>% 
+  summarise(range_min = quantile(value, probs = 0.05, na.rm = TRUE),
+            range_max = quantile(value, probs = 0.95, na.rm = TRUE),
+            avg = mean(value, na.rm = TRUE)) %>% 
+  fwrite('overall_values.csv')
+  
