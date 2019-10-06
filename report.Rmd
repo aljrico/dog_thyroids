@@ -94,7 +94,7 @@ thyroids_unique_value() %>%
     thyroids_unique_value()
   ) %>% 
   left_join(
-    read_excel('datos_1.xlsx') %>% 
+    read_excel('datos_3.xlsx') %>% 
       rename(id = `Nº (P)`) %>% 
       select(id, braquicefalico) %>% 
       na.omit()
@@ -109,7 +109,7 @@ thyroids_unique_value() %>%
     thyroids_unique_value()
   ) %>% 
   left_join(
-    read_excel('datos_1.xlsx') %>% 
+    read_excel('datos_3.xlsx') %>% 
       rename(id = `Nº (P)`) %>% 
       select(id, braquicefalico) %>% 
       na.omit()
@@ -134,7 +134,7 @@ thyroids_unique_value() %>%
     thyroids_unique_value()
   ) %>% 
   left_join(
-    read_excel('datos_1.xlsx') %>% 
+    read_excel('datos_3.xlsx') %>% 
       rename(id = `Nº (P)`) %>% 
       select(id, braquicefalico) %>% 
       na.omit()
@@ -149,7 +149,7 @@ thyroids_unique_value() %>%
     thyroids_unique_value()
   ) %>% 
   left_join(
-    read_excel('datos_1.xlsx') %>% 
+    read_excel('datos_3.xlsx') %>% 
       rename(id = `Nº (P)`) %>% 
       select(id, braquicefalico) %>% 
       na.omit()
