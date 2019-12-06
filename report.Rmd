@@ -218,7 +218,7 @@ clean_thyroids %>%
   group_by(id, contrast) %>% 
   summarise(value = mean(value, na.rm = TRUE)) %>% 
   inner_join(
-    read_excel('datos_2.xlsx') %>% 
+    read_excel('datos_3.xlsx') %>% 
       rename(id = `Nº (P)`) %>% 
       select(id, peso, braquicefalico) %>% 
       mutate(peso = peso %>% tolower() %>% str_remove_all('kg') %>% as.numeric()) %>% 
