@@ -65,7 +65,7 @@ thyroids_unique_value() %>%
 
 Una vez reducidos los valores a uno por animal, podemos ver la distribución que queda. Vemos que hay unos valores centrales muy marcados como 'lo habitual', mientras que los valores alejados de ahí son claramente inusuales. Definir la frontera entre 'valores normales' y 'valores inusuales' siempre requiere cierta arbitrariedad, pero viendo lo centradas que son las distribuciones, resolver esto por quantiles parece lo más razonable y sencillo.
 
-Los quadrados amarillos marcan los límites de lo que podría esperarse en el 80% de los casos. Por ejemplo, para el `Right NC` la interpretación sería que solo el 10% de los sujetos presentan un valor por debajo de `67`, y solo un 10% de los sujetas presentan un valor por encima de `121`. Se concluye que 'la normalidad' está entre esos dos valores.
+Los quadrados amarillos marcan los límites de lo que podría esperarse en el 80% de los casos. Por ejemplo, para el `Right NC` la interpretación sería que solo el 10% de los sujetos presentan un valor por debajo de `71`, y solo un 10% de los sujetas presentan un valor por encima de `115`. Se concluye que 'la normalidad' está entre esos dos valores.
 
 (Hasta ahora estamos juntando braquicefálicos y no-braquicefálicos)
 
