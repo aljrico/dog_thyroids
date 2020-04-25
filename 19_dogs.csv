@@ -1,0 +1,20 @@
+id,name,race,Retrospectivo,Prospectivo,braquicefálicos,Control,Edat en meses,Edat,motivo visita específico,Presenting complain (lo que interesa para el estudio),medicacions,sexo,peso,T4,TSH,contrast,athenuation_value,braqui
+59911,aretha,cane corso,X,,Y,N,5,0.416666666666667,"apatía, anorexia, fiebre, cojera EAI",inflamación,no med,hnc,23kg,,,NC,67.1,Y
+62285,peque,bdf,X,,X,N,60,5,masa palatino,cancer,no med,mc,9kg,,,NC,97.6111111111111,Y
+62380,hulk,chihuahua,X,,X,N,48,4,masa cervical,inflamación,no med,mnc,5.5kg,,,NC,84.4705882352941,Y
+56365,brutus,bdf,X,,X,N,132,11,masa bucal derecha,cancer,"atibiótico, antiemético, protector gástrico",mnc,15.5kg,,,NC,70.1739130434783,Y
+62563,cobi,bdf,X,,X,N,84,7,otitis bilateral,otitis,no med,mc,12.6kg,,,NC,79.9756097560976,Y
+57597,thor,bdf,X,,X,N,144,12,rinitis purulenta,cancer,protector gástrico,mnc,11.5kg,,,NC,55.1724137931035,Y
+8396,ilka,bdi,X,,X,N,84,7,otitis,otitis,no med,hc,21.4kg,,,NC,73.72,Y
+59899,nika,bdf,X,,X,N,84,7,otitis bilateral,otitis,analgesia + antiinflamatorio,hc,14kg,,,NC,80.6666666666667,Y
+64845,bocuse,bdf,X,,X,N,60,5,otitis,otitis,ciclosporina,mnc,15.5kg,,,NC,92.8620689655172,Y
+61596,bowie,bdf,X,,X,N,96,8,osteosarcoma,cancer,antiinflamatorio,hc,10kg,,,NC,98.1904761904762,Y
+61548,guizmo,bdf,X,,X,N,144,12,carcinoma nasal transicional,cancer,no med,mc,10kg,,,NC,67.2105263157895,Y
+57409,sebas,carlino,X,,X,N,108,9,estornudos,upper respiratory tract disease,antiinflamatorio,mc,12kg,,,NC,107.642857142857,Y
+51747,peny,chihuahua,,X,X,N,60,5,"estornudos inv, epistaxis, secre mucop 3 semanas",upper respiratory tract disease,antibiótico,hnc,3.2kg,1.21,0.231,NC,103.433333333333,Y
+69675,uma,bf,,X,X,N,144,12,"apatía, sospecha masa abdominal",cancer,no med,hc,14kg,1.61,0.153,NC,97.0526315789474,Y
+69531,dylan,cavalier king,,X,X,N,72,6,estornudos inversos,upper respiratory tract disease,antibiótico,mnc,11.5kg,2.55,0.105,NC,117.931034482759,Y
+69715,bimba,carlino,,X,X,N,24,2,"sonidos resp, síndrome braqui",upper respiratory tract diseases,entiemético + protector gástrico,hc,10kg,1.49,0.162,NC,76.1578947368421,Y
+69861,Nana,cavalier king charles,,X,X,N,84,7,masa esplénica,cancer,no med,hnc,11.4kg,1.8,0.17,NC,69.9130434782609,Y
+69939,layla,bulldog frances,,X,X,N,84,7,tetraparesia no amb,neurológico,antiinflamatorio,hnc,11kg,1.43,0.221,NC,75.5384615384615,Y
+43703,deker,bdf,,X,X,N,132,11,masa mandibular,cancer,antiemético + protector gástrico,mc,14kg,0.874,0.09,NC,107.8,Y
