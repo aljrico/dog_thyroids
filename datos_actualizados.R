@@ -7,12 +7,20 @@ clean_edat <- function(df) {
   df %>%
     mutate(Edat = ifelse(Edat %>% str_detect("a"), as.numeric(Edat %>% str_remove_all("a")), ifelse(Edat %>% str_detect("m"), as.numeric(Edat %>% str_remove_all("m")) / 12, as.numeric(Edat))))
 }
+remove_rufus <- function(df){
+  df %>% dplyr::filter(name != "rufus")
+}
+remove_sebas <- function(df){
+  df %>% dplyr::filter(name != "sebas")
+}
 clean_datos <- function(df) {
   colnames(df)[[1]] <- "id"
   colnames(df)[[2]] <- "name"
   colnames(df)[[3]] <- "race"
 
   df <- df %>% clean_edat()
+  df <- df %>% remove_rufus()
+  df <- df %>% remove_sebas()
   df
 }
 
@@ -155,7 +163,6 @@ read_excel("datos actualizatos.xlsx") %>%
 read_excel("datos actualizatos.xlsx") %>%
   clean_edat() %>%
   mutate(Control = ifelse(is.na(Control), "N", "Y")) %>%
-c
   scale_x_discrete(labels = c("Control", "Variant"))
 
 clean_thyroids <-
@@ -385,7 +392,7 @@ read_excel("datos actualizatos.xlsx") %>%
     select(athenuation_value, contrast) %>% 
     # pivot_longer(-athenuation_value) %>% 
     group_by(contrast) %>% 
-    summarise(athenuation_value = mean(athenuation_value, na.rm = TRUE))
+    summarise(athenuation_value = mean(athenuation_value, na.rm = TRUE)) %>% 
     ggplot(aes(x = athenuation_value, y = value)) +
     geom_point(size = 2) +
     facet_wrap(name~., scale = 'free') +
@@ -419,10 +426,133 @@ read_excel("datos actualizatos.xlsx") %>%
       average = mean(athenuation_value, na.rm = TRUE),
       standard_deviation = sd(athenuation_value, na.rm = TRUE)
     )
+  
+  
+  # Non-Control group stats
+  read_excel("datos actualizatos.xlsx") %>%
+    clean_datos() %>%
+    inner_join(clean_thyroids) %>%
+    mutate(Control = ifelse(is.na(Control), "N", "Y")) %>% 
+    filter(Control == "N") %>% 
+    select(id, name, race, Control, contrast, athenuation_value) %>% 
+    group_by(id, contrast) %>% 
+    summarise(athenuation_value = mean(athenuation_value, na.rm = TRUE)) %>% 
+    group_by(contrast) %>% 
+    summarise(
+      average = mean(athenuation_value, na.rm = TRUE),
+      standard_deviation = sd(athenuation_value, na.rm = TRUE)
+    )
 
   # parameters for power analysis
   effect = 0.2
   alpha = 0.05
   # perform power analysis
   pwr::pwr.t2n.test(n1 = 600, n2 = 700, d = effect, sig.level = 0.05)
+  
+
+# Total Population Range-------------------------------------------------------------------------
+
+  data_to_evaluate %>% 
+    ggplot(aes(x = athenuation_value, fill = contrast)) +
+    geom_histogram(colour = "black", size = 1) +
+    facet_wrap(contrast ~., scales = 'free') +
+    ayu::scale_fill_ayu_d(option = "qualitative1", guide = FALSE) +
+    theme_pubr() +
+    ylab('') +
+    xlab('')
+  
+  
+  data_to_evaluate %>% 
+  group_by(
+    contrast
+  ) %>% 
+    summarise(
+      average = mean(athenuation_value,na.rm = TRUE), 
+      sd = sd(athenuation_value, na.rm = TRUE)
+    )
+  
+  data_to_evaluate %>% 
+    group_by(
+      contrast
+    ) %>% 
+    summarise(
+      q80 = quantile(athenuation_value, 0.8, na.rm = TRUE),
+      q20 = quantile(athenuation_value, 0.2, na.rm = TRUE)
+    )
+  
+
+# Non-Braqui Population Range ---------------------------------------------
+
+  read_excel("datos actualizatos.xlsx") %>%
+    clean_datos() %>%
+    inner_join(clean_thyroids) %>% 
+    filter(is.na(braquicefálicos)) %>% 
+    ggplot(aes(x = athenuation_value, fill = contrast)) +
+    geom_histogram(colour = "black", size = 1) +
+    facet_wrap(contrast ~., scales = 'free') +
+    ayu::scale_fill_ayu_d(option = "qualitative1", guide = FALSE) +
+    theme_pubr() +
+    ylab('') +
+    xlab('') +
+    labs(
+      title = "Athenuation Value Distribution",
+      subtitle = "Non-brachycephalic individuals"
+    )
+  
+  read_excel("datos actualizatos.xlsx") %>%
+    clean_datos() %>%
+    inner_join(clean_thyroids) %>% 
+    filter(is.na(braquicefálicos)) %>% 
+    group_by(
+      contrast
+    ) %>% 
+    summarise(
+      average = mean(athenuation_value,na.rm = TRUE), 
+      sd = sd(athenuation_value, na.rm = TRUE)
+    )
+  
+  read_excel("datos actualizatos.xlsx") %>%
+    clean_datos() %>%
+    inner_join(clean_thyroids) %>% 
+    filter(is.na(braquicefálicos)) %>% 
+    group_by(
+      contrast
+    ) %>% 
+    summarise(
+      q80 = quantile(athenuation_value, 0.8, na.rm = TRUE),
+      q20 = quantile(athenuation_value, 0.2, na.rm = TRUE)
+    )
+  
+
+# Athenuation Value vs Brachycephalia -------------------------------------
+  read_excel("datos actualizatos.xlsx") %>%
+    clean_datos() %>%
+    inner_join(clean_thyroids) %>% 
+    mutate(brachy = 
+      case_when(
+        is.na(braquicefálicos) ~ "No",
+        TRUE ~ "yes"
+      )
+    ) %>% 
+    ggplot(aes(x = brachy, y = athenuation_value, colour = brachy)) +
+    facet_wrap(contrast~.) +
+    geom_boxplot(size = 1, outlier.shape = NA) +
+    geom_jitter(size = 5, width = 0.1, alpha = 0.25) +
+    stat_compare_means(method = "t.test") +
+    theme_pubr() +
+    ayu::scale_colour_ayu_d(option = "qualitative1", guide = FALSE)
+  
+
+# Athenuation Value vs Control Group --------------------------------------
+  
+  data_to_evaluate %>% 
+    ggplot(aes(x = Control, y = athenuation_value, colour = Control)) +
+    facet_wrap(contrast~.) +
+    geom_boxplot(size = 1, outlier.shape = NA) +
+    geom_jitter(size = 5, width = 0.1, alpha = 0.25) +
+    stat_compare_means(method = "t.test") +
+    theme_pubr() +
+    ayu::scale_colour_ayu_d(option = "qualitative1", guide = FALSE)
+    
+  
   
